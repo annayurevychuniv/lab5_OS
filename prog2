@@ -1,0 +1,43 @@
+#include <iostream>
+#include <iomanip>
+#include <fcntl.h>
+#include <unistd.h>
+#include <cerrno>
+#include <cstring>
+#include <vector>
+
+using namespace std;
+
+int main(int argc, char **argv) {
+    if (argc != 4) {
+        cerr << "Usage: " << argv[0] << " <pid> <address> <size>" << endl;
+        return -1;
+    }
+    string pid{argv[1]};
+    auto start = stoull(argv[2], nullptr, 16);
+    auto size = stoull(argv[3]);
+    auto filename = "/proc/" + pid + "/mem";
+    int fd = open(filename.c_str(), O_RDONLY);
+    if (fd == -1) {
+        cerr << "Error opening file: " << strerror(errno) << endl;
+        return -2;
+    }
+    off_t res = lseek(fd, (off_t)start, SEEK_SET);
+    if (res == (off_t)-1) {
+        cerr << "Error seeking in file: " << strerror(errno) <<
+        endl;
+        close(fd);
+        return -3;
+    }
+    vector<char> buffer(size);
+    ssize_t read_res = read(fd, buffer.data(), buffer.size());
+    if (read_res == -1) {
+        cerr << "Error reading file: " << strerror(errno) << endl;
+        close(fd);
+        return -4;
+    }
+    string output(buffer.begin(), buffer.begin() + read_res);
+    cout << "Data is: " << quoted(output) << "\n";
+    close(fd);
+    return 0;
+}
