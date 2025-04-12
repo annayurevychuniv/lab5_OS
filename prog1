@@ -1,0 +1,21 @@
+#include <iostream>
+#include <cstring>
+#include <sys/types.h>
+#include <unistd.h>
+
+using namespace std;
+
+int main() {
+    cout << "Enter smth: ";
+    string input;
+    getline(cin, input);
+    char * data = new char[input.length() + 1];
+    strcpy(data, input.c_str());
+    cout << "Process PID: " << getpid() << endl;
+    cout << "Memory address: " << static_cast<void*>(data) << endl;
+    cout << "Data: " << data << endl;
+    cout << "Size: " << input.length() + 1 << endl;
+    cin.get();
+    delete[] data;
+    return 0;
+}
